@@ -1,0 +1,20 @@
+$kind: http-request
+url: "{{baseUrl}}/api/todos/:id"
+method: PUT
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+pathVariables:
+  id: "1413"
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "description": "string",
+      "completed": true,
+      "dueDate": "1970-02-10"
+    }
+settings: {}
+examples: ./.resources/update.resources/examples
+order: 2000

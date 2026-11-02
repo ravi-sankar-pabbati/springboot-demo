@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/hello?name=World"
+method: GET
+headers:
+  Accept: "*/*"
+queryParams:
+  name: World
+settings: {}
+examples: ./.resources/hello.resources/examples
+order: 3000

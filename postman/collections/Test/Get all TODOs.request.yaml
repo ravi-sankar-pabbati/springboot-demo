@@ -1,0 +1,6 @@
+$kind: http-request
+description: ""
+url: http://localhost:8080/api/todos
+method: GET
+examples: .resources/Get all TODOs.resources/examples
+order: 2000

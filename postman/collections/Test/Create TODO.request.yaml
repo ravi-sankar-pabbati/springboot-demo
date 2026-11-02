@@ -1,0 +1,41 @@
+$kind: http-request
+url: http://localhost:8080/api/todos
+method: POST
+headers:
+  Content-Type: application/json
+body:
+  type: json
+  content: |-
+    {
+              "title": "Buy milk",
+              "description": "Two bottles",
+              "completed": false
+            }
+scripts:
+  - type: afterResponse
+    code: |-
+      pm.test("Status is 201 Created", function () {
+          pm.response.to.have.status(201);
+      });
+
+      const todo = pm.response.json();
+
+      pm.test("Response contains the created TODO", function () {
+          pm.expect(todo.id).to.be.a("number");
+          pm.expect(todo.id).to.be.above(0);
+          pm.expect(todo.title).to.eql("Buy milk");
+          pm.expect(todo.description).to.eql("Two bottles");
+          pm.expect(todo.completed).to.eql(false);
+      });
+
+      pm.test("Location header points to the created TODO", function () {
+          pm.expect(pm.response.headers.get("Location"))
+              .to.eql("/api/todos/" + todo.id);
+      });
+
+      // Save the ID for subsequent requests in this collection.
+      if (pm.response.code === 201) {
+          pm.collectionVariables.set("todoId", todo.id);
+      }
+    language: text/javascript
+order: 1000

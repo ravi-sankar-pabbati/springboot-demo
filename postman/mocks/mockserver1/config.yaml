@@ -1,0 +1,15 @@
+id: 01a19c36-2389-7228-ab99-d62bb146e506
+version: 1
+name: MockServer1
+slug: new-mock-3ad37
+enableSession: true
+protocol: http
+port: 4500
+autoRestartOnChange: true
+logging:
+  level: verbose
+  showBody: true
+scenarios:
+  - name: default
+    path: ./default.js
+    default: true

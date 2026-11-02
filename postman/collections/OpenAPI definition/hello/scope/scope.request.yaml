@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/hello/scope?name=World"
+method: GET
+headers:
+  Accept: "*/*"
+queryParams:
+  name: World
+settings: {}
+examples: ./.resources/scope.resources/examples
+order: 1000

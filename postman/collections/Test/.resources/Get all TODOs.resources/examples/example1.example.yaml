@@ -1,0 +1,47 @@
+$kind: http-example
+request:
+  url: http://localhost:8080/api/todos
+  method: GET
+response:
+  statusCode: 200
+  statusText: ""
+  headers:
+    Content-Type: application/json
+    Content-Length: "353"
+    Date: Mon, 02 Nov 2026 12:17:37 GMT
+    Keep-Alive: timeout=60
+    Connection: keep-alive
+  body:
+    type: json
+    content: |-
+      [
+        {
+          "id": 2,
+          "title": "Buy groceries",
+          "description": null,
+          "completed": false,
+          "dueDate": null
+        },
+        {
+          "id": 6,
+          "title": "Buy milk",
+          "description": "Two bottles",
+          "completed": false,
+          "dueDate": null
+        },
+        {
+          "id": 7,
+          "title": "Buy milk",
+          "description": "Two bottles",
+          "completed": false,
+          "dueDate": null
+        },
+        {
+          "id": 8,
+          "title": "Buy milk",
+          "description": "Two bottles",
+          "completed": false,
+          "dueDate": null
+        }
+      ]
+order: 1000

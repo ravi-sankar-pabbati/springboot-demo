@@ -1,0 +1,22 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/hello/scope?name=World"
+  method: GET
+  headers:
+    Accept: "*/*"
+  queryParams:
+    name: World
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      {
+        "greeting": "string",
+        "firstInstanceId": "string",
+        "secondInstanceId": "string"
+      }
+order: 1000

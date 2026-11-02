@@ -1,0 +1,15 @@
+$kind: http-request
+url: "{{baseUrl}}/hello"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+body:
+  type: json
+  content: |-
+    {
+      "name": "string"
+    }
+settings: {}
+examples: ./.resources/hello From Body.resources/examples
+order: 4000

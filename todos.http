@@ -1,0 +1,50 @@
+@baseUrl = http://localhost:8080
+
+### Create a TODO (201). Run first to capture todoId for subsequent requests.
+POST {{baseUrl}}/api/todos
+Content-Type: application/json
+
+{
+  "title": "Buy milk",
+  "description": "Two bottles",
+  "completed": false
+}
+
+> {%
+    client.test("TODO created", function () {
+        client.assert(response.status === 201, "Expected 201 Created");
+    });
+    if (response.status === 201) {
+        client.global.set("todoId", response.body.id);
+    }
+%}
+
+### List all TODOs (200)
+GET {{baseUrl}}/api/todos
+
+### Get the created TODO (200)
+GET {{baseUrl}}/api/todos/{{todoId}}
+
+### Update and mark completed (200). PUT replaces all fields.
+PUT {{baseUrl}}/api/todos/{{todoId}}
+Content-Type: application/json
+
+{
+  "title": "Buy milk",
+  "description": "Two bottles purchased",
+  "completed": true
+}
+
+### Delete the created TODO (204)
+DELETE {{baseUrl}}/api/todos/{{todoId}}
+
+### Fetch the deleted TODO (404). Run after Delete.
+GET {{baseUrl}}/api/todos/{{todoId}}
+
+### Test validation: blank title (400)
+POST {{baseUrl}}/api/todos
+Content-Type: application/json
+
+{
+  "title": "   "
+}

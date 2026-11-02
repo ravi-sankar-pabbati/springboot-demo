@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/api/todos/:id"
+method: DELETE
+pathVariables:
+  id: "1413"
+settings: {}
+examples: ./.resources/delete.resources/examples
+order: 3000

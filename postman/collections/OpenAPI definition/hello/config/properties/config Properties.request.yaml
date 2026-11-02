@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/hello/config/properties"
+method: GET
+headers:
+  Accept: "*/*"
+settings: {}
+examples: ./.resources/config Properties.resources/examples
+order: 1000

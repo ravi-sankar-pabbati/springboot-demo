@@ -1,0 +1,31 @@
+$kind: http-example
+request:
+  url: "{{baseUrl}}/api/todos"
+  method: GET
+  headers:
+    Accept: "*/*"
+response:
+  statusCode: 200
+  statusText: OK
+  headers:
+    Content-Type: "*/*"
+  body:
+    type: text
+    content: |-
+      [
+        {
+          "id": 982,
+          "title": "string",
+          "description": "string",
+          "completed": false,
+          "dueDate": "2024-12-01"
+        },
+        {
+          "id": 5530,
+          "title": "string",
+          "description": "string",
+          "completed": true,
+          "dueDate": "2011-11-21"
+        }
+      ]
+order: 1000

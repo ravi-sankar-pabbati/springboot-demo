@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/api/todos"
+method: GET
+headers:
+  Accept: "*/*"
+settings: {}
+examples: ./.resources/list.resources/examples
+order: 2000

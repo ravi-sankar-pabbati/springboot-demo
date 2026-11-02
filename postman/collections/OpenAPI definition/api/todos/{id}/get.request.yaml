@@ -1,0 +1,10 @@
+$kind: http-request
+url: "{{baseUrl}}/api/todos/:id"
+method: GET
+headers:
+  Accept: "*/*"
+pathVariables:
+  id: "1413"
+settings: {}
+examples: ./.resources/get.resources/examples
+order: 1000

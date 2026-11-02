@@ -1,0 +1,8 @@
+$kind: http-request
+url: "{{baseUrl}}/hello/config/value"
+method: GET
+headers:
+  Accept: "*/*"
+settings: {}
+examples: ./.resources/config Value.resources/examples
+order: 1000

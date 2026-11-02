@@ -1,0 +1,18 @@
+$kind: http-request
+url: "{{baseUrl}}/api/todos"
+method: POST
+headers:
+  Content-Type: application/json
+  Accept: "*/*"
+body:
+  type: json
+  content: |-
+    {
+      "title": "string",
+      "description": "string",
+      "completed": true,
+      "dueDate": "1970-02-10"
+    }
+settings: {}
+examples: ./.resources/create.resources/examples
+order: 3000
