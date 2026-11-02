@@ -1,6 +1,30 @@
-# TODO API
+# Spring Boot Demo
 
-Requires Java 17+ and PostgreSQL with an existing `demo` database.
+A learning project covering our November 1–2, 2026 experiments with Spring beans, REST APIs, validation, PostgreSQL persistence, schema migrations, and API tooling.
+
+## What we explored
+
+- Registering a plain `GreetingService` through `@Configuration` and `@Bean`, with constructor injection into a controller.
+- Injecting a request-scoped service through a proxy into a singleton controller, and observing instance identity across requests.
+- Reading individual settings with `@Value` and binding grouped settings to an `AppProperties` record with `@ConfigurationProperties`.
+- Handling query parameters, JSON bodies, response records, HTTP status codes, and headers with Spring MVC and `ResponseEntity`.
+- Validating requests with Jakarta Bean Validation and centralizing errors with `@RestControllerAdvice`.
+- Building a TODO CRUD API using a transactional service, Spring Data JPA, and PostgreSQL, then adding an optional due date.
+- Moving schema management to Flyway migrations with Hibernate schema validation.
+- Exploring OpenAPI, Swagger UI, IntelliJ HTTP requests, and Postman collections and mock files.
+- Testing controllers with MockMvc and testing the Spring context and persistence with H2.
+
+## Run locally
+
+Requires Java 17+ and a running PostgreSQL server. The Maven wrapper is included.
+
+Create the database once using a PostgreSQL account with database creation permission:
+
+```sh
+createdb demo
+```
+
+Start the application:
 
 ```sh
 ./mvnw spring-boot:run
@@ -8,35 +32,124 @@ Requires Java 17+ and PostgreSQL with an existing `demo` database.
 DB_PASSWORD=your-password ./mvnw spring-boot:run
 ```
 
-Defaults: `jdbc:postgresql://localhost:5432/demo`, user `ravisankarpabbati`, empty password.
-Override with `DB_URL`, `DB_USERNAME`, and `DB_PASSWORD`. Hibernate creates/updates the
-`todos` table on startup (`ddl-auto=update`, suitable for this local demo).
+The default base URL is `http://localhost:8080`.
+
+| Environment variable | Default |
+| --- | --- |
+| `DB_URL` | `jdbc:postgresql://localhost:5432/demo` |
+| `DB_USERNAME` | `ravisankarpabbati` |
+| `DB_PASSWORD` | Empty password |
+
+Override these values to match your PostgreSQL installation. [Application properties](src/main/resources/application.properties) also define `app.name=Greeting Demo` and `app.max-greetings=5`. The latter demonstrates typed binding; it does not enforce a request limit.
+
+## Greeting and configuration endpoints
+
+| Method | Path | Behavior |
+| --- | --- | --- |
+| GET | `/hello?name=Ravi` | Returns `Hello, Ravi!`; omitted name defaults to `World` |
+| POST | `/hello` | Reads `{"name":"Ravi"}` and returns a greeting with an `X-App-Name` header |
+| GET | `/hello/scope` | Returns a greeting and two service instance IDs |
+| GET | `/hello/config/value` | Returns the application name injected with `@Value` |
+| GET | `/hello/config/properties` | Returns the bound `name` and `maxGreetings` settings |
+
+```sh
+curl 'http://localhost:8080/hello?name=Ravi'
+curl -i http://localhost:8080/hello \
+  -H 'Content-Type: application/json' \
+  -d '{"name":"Ravi"}'
+curl http://localhost:8080/hello/scope
+```
+
+Call `/hello/scope` twice: `firstInstanceId` and `secondInstanceId` match within each response and change between requests. For `POST /hello`, `name` must be present and non-null; an empty string is allowed by `@NotNull`.
+
+## TODO API
 
 | Method | Path | Result |
 | --- | --- | --- |
-| POST | `/api/todos` | Create; 201 and Location header |
-| GET | `/api/todos` | List ordered by ID |
-| GET | `/api/todos/{id}` | Fetch one |
-| PUT | `/api/todos/{id}` | Replace title, description, completion status |
-| DELETE | `/api/todos/{id}` | Delete; 204 |
+| POST | `/api/todos` | Create; `201 Created` and a `Location` header |
+| GET | `/api/todos` | List ordered by ID; `200 OK` |
+| GET | `/api/todos/{id}` | Fetch one; `200 OK` |
+| PUT | `/api/todos/{id}` | Replace all editable fields; `200 OK` |
+| DELETE | `/api/todos/{id}` | Delete; `204 No Content` |
 
 ```sh
 curl -i http://localhost:8080/api/todos \
   -H 'Content-Type: application/json' \
-  -d '{"title":"Buy milk","description":"Two bottles","completed":false}'
+  -d '{"title":"Buy milk","description":"Two bottles","completed":false,"dueDate":"2026-11-05"}'
 
+curl http://localhost:8080/api/todos
+
+# Replace 1 with the ID returned by the create request.
 curl -X PUT http://localhost:8080/api/todos/1 \
   -H 'Content-Type: application/json' \
-  -d '{"title":"Buy milk","description":"Two bottles","completed":true}'
+  -d '{"title":"Buy milk","description":"Two bottles purchased","completed":true,"dueDate":"2026-11-06"}'
+
+curl -i -X DELETE http://localhost:8080/api/todos/1
 ```
 
-Title is required, nonblank, and limited to 200 characters. Description is optional
-and limited to 2000 characters. Completion defaults to false. PUT replaces the whole
-resource: omitted description becomes null and omitted completion becomes false.
-Invalid requests return 400; missing TODOs return 404.
+| Field | Rules |
+| --- | --- |
+| `id` | Generated by the database; returned in responses |
+| `title` | Required, nonblank, at most 200 characters; surrounding whitespace is stripped before storage |
+| `description` | Optional, at most 2000 characters |
+| `completed` | Defaults to `false` when omitted or null |
+| `dueDate` | Optional date in `YYYY-MM-DD` format, mapped to `LocalDate` |
 
-The controller handles HTTP, the transactional service handles operations, and the
-Spring Data repository handles JPA persistence. Request/response records keep the
-HTTP contract separate from the entity. Existing `/hello` examples remain available.
+PUT replaces the resource: omitted `description` and `dueDate` become null, and omitted `completed` becomes false. There is no PATCH endpoint.
 
-Run `./mvnw test`. Tests use an isolated H2 database and do not modify local PostgreSQL.
+Invalid input, malformed JSON, invalid dates, and nonnumeric IDs return `400 Bad Request`. Missing TODOs return `404 Not Found`. Shared error responses contain `message` and `fieldErrors`, for example:
+
+```json
+{
+  "message": "Validation failed",
+  "fieldErrors": {
+    "title": "Title is required"
+  }
+}
+```
+
+## Database migrations
+
+Flyway runs SQL migrations from [src/main/resources/db/migration](src/main/resources/db/migration) on startup:
+
+| Migration | Change |
+| --- | --- |
+| `V1__create_todos.sql` | Creates the table with identity ID, title, description, and completion status |
+| `V2__add_todo_due_date.sql` | Adds the nullable `due_date` column |
+
+`spring.jpa.hibernate.ddl-auto=validate` checks entity mappings against the schema; Hibernate does not create or update tables. Add new migrations for future schema changes rather than editing migrations already applied to a database. Open Session in View is disabled; persistence operations run in service transactions.
+
+If reusing a database from the earlier Hibernate `ddl-auto=update` experiment, reconcile its schema and Flyway history before startup, or use a fresh demo database. The current configuration does not automatically baseline an existing schema.
+
+## API documentation and request tools
+
+With the application running:
+
+- [Swagger UI](http://localhost:8080/swagger-ui.html) provides an interactive API explorer.
+- [OpenAPI JSON](http://localhost:8080/v3/api-docs) exposes the generated specification.
+- [todos.http](todos.http) contains IntelliJ HTTP Client requests for CRUD, validation, and missing-resource cases. Run Create first to capture `todoId` for later requests.
+- [postman](postman) contains an OpenAPI-derived collection, manual TODO requests, a Dev environment, globals, and mock-server files. Review environment and request values before running them.
+
+The Postman mock in `postman/mocks/mockserver1` defaults to port `4500` and implements list/create TODO requests with session state. It uses Postman's `pm.state` API and differs from the real API's validation and full CRUD behavior.
+
+## Tests
+
+```sh
+./mvnw test
+```
+
+Tests use an isolated in-memory H2 database configured in [test application properties](src/test/resources/application.properties), with Flyway migrations and Hibernate schema validation. They do not modify local PostgreSQL.
+
+| Test class | Coverage |
+| --- | --- |
+| `HelloControllerTest` | Greetings, headers, name validation, malformed and missing bodies |
+| `SpringbootDemoApplicationTests` | Request-scoped bean identity within and between requests |
+| `TodoApiTests` | CRUD, validation, missing resources, due-date persistence, updates, clearing, and invalid dates |
+| `OpenApiDocumentationTest` | Generated API paths and Swagger UI availability |
+
+## Code layout
+
+- `com.example.springbootdemo.SpringbootDemoApplication`: entry point, component scanning, entity scanning, and repository discovery.
+- `com.example.demo`: greeting controller, bean configuration, typed properties, and shared exception handling.
+- `com.example.demo.todo`: TODO controller, transactional service, repository, entity, request/response records, and not-found exception.
+- `src/main/resources/db/migration`: versioned database schema changes.
