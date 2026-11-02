@@ -2,7 +2,7 @@
 
 A learning project covering our November 1–2, 2026 experiments with Spring beans, REST APIs, validation, PostgreSQL persistence, schema migrations, and API tooling.
 
-## What we explored
+## Features and Concepts
 
 - Registering a plain `GreetingService` through `@Configuration` and `@Bean`, with constructor injection into a controller.
 - Injecting a request-scoped service through a proxy into a singleton controller, and observing instance identity across requests.
