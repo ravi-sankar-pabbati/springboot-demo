@@ -22,6 +22,17 @@ Content-Type: application/json
 ### List all TODOs (200)
 GET {{baseUrl}}/api/todos
 
+> {%
+    client.test("Response includes a trace ID", function () {
+        client.assert(/^[0-9a-f]{32}$/.test(response.headers.valueOf("X-Trace-Id")),
+            "Expected a 32-character trace ID");
+    });
+%}
+
+### Continue a W3C trace. X-Trace-Id should match the trace ID below.
+GET {{baseUrl}}/api/todos
+traceparent: 00-0123456789abcdef0123456789abcdef-0123456789abcdef-01
+
 ### Get the created TODO (200)
 GET {{baseUrl}}/api/todos/{{todoId}}
 
